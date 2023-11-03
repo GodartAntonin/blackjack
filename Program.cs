@@ -4,89 +4,130 @@ namespace Blackjack
 {
     internal class Program
     {
+        static bool playerStoppedDrawing = false;
+        static bool croupierStoppedDrawing = false;
+        static int playerScore = 0;
+        static int croupierScore = 0;
+        static List<int> playerCards = new List<int>();
+        static List<int> croupierCards = new List<int>();
+
+        static void ResetGame()
+        {
+            playerStoppedDrawing = false;
+            croupierStoppedDrawing = false;
+            playerScore = 0;
+            croupierScore = 0;
+            playerCards = new List<int>();
+            croupierCards = new List<int>();
+        }
+
         static void Main()
         {
-            int playerScore = 0;
-            int croupierScore = 0;
-            int playerCard;
-            int croupierCard;
             Random random = new Random();
 
-            // First turn
-            Console.WriteLine("Le Croupier pioche une carte");
-            croupierCard = random.Next(1, 11);
-            if (croupierCard == 1 && croupierScore <= 11)
+            while ((!playerStoppedDrawing || !croupierStoppedDrawing) && playerCards.Count < 5)
             {
-                croupierScore += 11;
-            }
-            else
-            {
-                croupierScore += 1;
-            }
-
-            Console.WriteLine("A votre tour de piocher une carte");
-            playerCard = random.Next(1, 11);
-            Console.WriteLine("Votre carte est " + playerCard);
-            if (playerCard == 1)
-            {
-                string answer = "";
-                while (answer != "1" && answer != "11")
+                if (!croupierStoppedDrawing)
                 {
-                    Console.WriteLine("Vous avez pioché un as, souhaitez-vous 1 ou 11 points ? ");
-                    answer = Console.ReadLine() ?? "";
-                }
-                playerScore += Int32.Parse(answer);
-                Console.WriteLine("Vous avez donc un total de " + playerScore + " points");
-            }
-            else
-            {
-                playerScore += playerCard;
-            }
+                    Console.WriteLine("Le Croupier pioche une carte.");
+                    int croupierCard = random.Next(1, 11);
+                    croupierCards.Add(croupierCard);
+                    if (croupierCard == 1)
+                    {
+                        if (croupierScore <= 11)
+                        {
+                            croupierScore += 11;
+                        }
+                        else
+                        {
+                            croupierScore += 1;
+                        }
+                    }
+                    else
+                    {
+                        croupierScore += croupierCard;
+                    }
 
-            // Second turn
-            Console.WriteLine("Le croupier repioche ");
-            croupierCard = random.Next(1, 11);
-            if (croupierCard == 1 && croupierScore <= 11)
-            {
-                croupierScore += 11;
-            }
-            else
-            {
-                croupierScore += 1;
-            }
-            if (croupierScore > 22)
-            {
-                Console.WriteLine("Le Croupier a sauté vous avez gagné! Voulez-vous rejouer? Appuyer sur O pour Oui et N pour Non");
-            }
-            else
-            {
-                Environment.Exit(0);
-            }
-            Console.WriteLine("A votre tour de piocher une carte");
-            playerCard = random.Next(1, 11);
-            Console.WriteLine("Votre carte est " + playerCard);
-            if (playerCard == 1)
-            {
-                string answer = "";
-                while (answer != "1" && answer != "11")
-                {
-                    Console.WriteLine("Vous avez pioché un as, souhaitez-vous 1 ou 11 points ? ");
-                    answer = Console.ReadLine() ?? "";
+                    if (croupierScore > 16)
+                    {
+                        croupierStoppedDrawing = true;
+                        if (croupierScore > 21)
+                        {
+                            croupierStoppedDrawing = true;
+                            playerStoppedDrawing = true;
+                            string replayAnswer = "";
+                            while (replayAnswer != "O" && replayAnswer != "N")
+                            {
+                                Console.WriteLine("Le croupier a sauté avec " + croupierScore + " Points. Vous avez gagné. Voulez-vous rejouer ? Appuyez sur O pour Oui et N pour Non");
+                                replayAnswer = Console.ReadLine() ?? "";
+                            }
+                            if (replayAnswer == "O")
+                            {
+                                ResetGame();
+                                break;
+                            }
+                            else
+                            {
+                                Environment.Exit(0);
+                            }
+                        }
+                    }
                 }
-                playerScore += Int32.Parse(answer);
-                Console.WriteLine("Vous avez donc un total de " + playerScore + " points");
-            }
-            else
-            {
-                playerScore += playerCard;
-            }
-            if (playerScore >= 22)
-            {
-                Console.WriteLine("Vous avez sauté, pas de chance. Voulez-Vous recommencer ? Si oui appuyer sur O et sinon appuyer sur N");
-            }
-            else
-            {
-                Environment.Exit(0);
+
+                if (!playerStoppedDrawing)
+                {
+                    Console.WriteLine("A votre tour de piocher une carte.");
+                    int playerCard = random.Next(1, 11);
+                    playerCards.Add(playerCard);
+                    Console.WriteLine("Votre carte est " + playerCard);
+                    if (playerCard == 1)
+                    {
+                        string aceAnswer = "";
+                        while (aceAnswer != "1" && aceAnswer != "11")
+                        {
+                            Console.WriteLine("Vous avez pioché un as, souhaitez-vous 1 ou 11 Points ? ");
+                            aceAnswer = Console.ReadLine() ?? "";
+                        }
+                        playerScore += Int32.Parse(aceAnswer);
+                        Console.WriteLine("Vous avez donc un total de " + playerScore + " Points");
+                    }
+                    else
+                    {
+                        playerScore += playerCard;
+                        Console.WriteLine("Vous avez donc un total de " + playerScore + " Points");
+                    }
+                    if (playerScore > 21)
+                    {
+                        croupierStoppedDrawing = true;
+                        playerStoppedDrawing = true;
+                        string replayAnswer = "";
+                        while (replayAnswer != "O" && replayAnswer != "N")
+                        {
+                            Console.WriteLine("Vous avez sauté, le croupier a gagné, il avait " + croupierScore + " Points. Voulez-vous rejouer ? Appuyer sur O pour Oui et N pour Non");
+                            replayAnswer = Console.ReadLine() ?? "";
+                        }
+                        if (replayAnswer == "O")
+                        {
+                            ResetGame();
+                            break;
+                        }
+                        else
+                        {
+                            Environment.Exit(0);
+                        }
+
+                    }
+                    string drawAnswer = "";
+                    while (drawAnswer != "O" && drawAnswer != "N")
+                    {
+                        Console.WriteLine("Voulez-vous piocher au prochain tour ? O pour Oui et N pour Non");
+                        drawAnswer = Console.ReadLine() ?? "";
+                    }
+                    if (drawAnswer == "N")
+                    {
+                        playerStoppedDrawing = true;
+                    }
+                }
             }
         }
     }
